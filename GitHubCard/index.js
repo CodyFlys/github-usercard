@@ -46,6 +46,84 @@ const followersArray = [];
 
 */
 
+function gitHubCard(data) {
+  // --------------------  CARD CREATION START -------------------- 
+
+  // card creation and profile picture
+  let newCard = document.createElement('div');
+  newCard.classList.add('card')
+  let profilePicture = document.createElement('img');
+  profilePicture.src = data.avatar_url;
+
+  // card info
+  let newCardInfo = document.createElement('div');
+  newCardInfo.classList.add('card-info')
+  let realName = document.createElement('h3');
+  realName.classList.add('name')
+  let userName = document.createElement('p');
+  userName.classList.add('username')
+  let location = document.createElement('p');
+  location.textContent = `Location: ${data.location}`
+  let profile = document.createElement('p'); // this one may be tricky.
+  profile.textContent = `profile: `
+  let followers = document.createElement('p');
+  followers.textContent = `Followers: ${data.followers}`
+  let following = document.createElement('p');
+  following.textContent = `Following: ${data.following}`
+  let bio = document.createElement('p');
+  bio.textContent = `Bio: ${data.bio}`
+  let link = document.createElement('a');
+  link.setAttribute('href', data.html_url);
+
+  link.textContent = data.html_url;
+
+  // --------------------  CARD CREATION END --------------------
+  // --------------------  CARD APPENDING START --------------------
+  newCard.append(profilePicture, newCardInfo);
+
+  // newCardInfo is appended to "newCard" with all items below.
+  newCardInfo.append(realName, userName, location, profile, followers, following, bio);
+  profile.append(link)
+  return newCard;
+}
+
+const userCards = document.querySelector('.cards');
+
+axios.get('https://api.github.com/users/CodyFlys')
+.then(response => {
+  console.log(response);
+  userCards.append(gitHubCard(response.data))
+})
+.catch(error => {
+  console.log("ERROR FOUND!", error)
+})
+
+
+
+axios.get('https://api.github.com/users/codyflys/followers')
+.then(response => {
+  response.data.forEach(function (item) {
+    followersArray.push(item.login)
+
+  })
+  followersArray.forEach(function (item){
+    axios.get(`https://api.github.com/users/${item}`)
+    .then(response => {
+      userCards.append(gitHubCard(response.data))
+    })
+  
+    .catch(error => {
+    console.log("ERROR FOUND!", error)
+    })
+  })
+
+})
+.catch(error => {
+  console.log("ERROR FOUND!", error)
+})
+
+console.log(followersArray);
+
 /* List of LS Instructors Github username's: 
   tetondan
   dustinmyers
